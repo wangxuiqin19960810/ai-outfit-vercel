@@ -27,6 +27,7 @@ generateBtn.addEventListener('click', async () => {
 
   // 获取天气（使用 wttr.in，支持 CORS）
   let weather = '';
+  let temperature = '';
   // 天气代码映射表 (英文转中文)
   const weatherMap = {
       0: "晴",
@@ -82,6 +83,7 @@ generateBtn.addEventListener('click', async () => {
       if (weatherData.current_weather) {
         const code = weatherData.current_weather.weathercode;
         weather = weatherMap[code] || "未知";
+        temperature = weatherData.current_weather.temperature;
       } else {
         console.warn('天气数据异常:', weatherData);
       }
@@ -90,7 +92,7 @@ generateBtn.addEventListener('click', async () => {
   }
 
   // 构造 Prompt
-  const prompt = `你是一位专业时尚顾问。用户是${gender}，年龄约${ageRange}岁，今天所在地（${city}）天气为“${weather}”。请推荐一套适合今天的穿搭，包括上衣、下装、鞋子和配饰建议。语气亲切简洁，不超过100字。`;
+  const prompt = `你是一位专业时尚顾问。用户是${gender}，年龄约${ageRange}岁，今天所在地（${city}）天气为“${weather}温度为${temperature}℃”。请推荐一套适合今天的穿搭，包括上衣、下装、鞋子和配饰建议。语气亲切简洁，不超过100字。`;
 
   resultDiv.innerHTML = '<div class="loading">AI 正在思考穿搭方案...</div>';
   resultDiv.style.display = 'block';
