@@ -33,7 +33,7 @@ try {
   
   // 第一步：通过城市名称获取location ID
     const locationResponse = await fetch(
-      `https://devapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
+      `https://devapi.qweather.com/geo/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
       { mode: 'cors' }
     );
   
