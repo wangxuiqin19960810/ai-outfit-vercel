@@ -29,7 +29,7 @@ generateBtn.addEventListener('click', async () => {
   let weather = '晴朗';
   try {
     // TODO: 替换为你的和风天气API Key
-    const heWeatherKey = 'a5b3f1b1dba843a893bf60dec789312f';
+    const heWeatherKey = 'd4bc9c5f3e1a43c3884abfc4f3f7becd';
     
     const res = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${heWeatherKey}`, {
       mode: 'cors'
