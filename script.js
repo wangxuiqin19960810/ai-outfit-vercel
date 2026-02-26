@@ -26,49 +26,68 @@ generateBtn.addEventListener('click', async () => {
   const ageRange = '20-30岁';
 
   // 获取天气（使用 wttr.in，支持 CORS）
-  let weather = '晴朗';
-try {
-  // 使用你现有的API Key
-  const heWeatherKey = 'd4bc9c5f3e1a43c3884abfc4f3f7becd';
-  
-  // 第一步：通过城市名称获取location ID
-    const locationResponse = await fetch(
-      `https://devapi.qweather.com/geo/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
-      { mode: 'cors' }
-    );
-  
-  if (!locationResponse.ok) {
-    throw new Error('城市查询失败');
+  let weather = '';
+  // 天气代码映射表 (英文转中文)
+  const weatherMap = {
+      0: "晴",
+      1: "晴转多云",
+      2: "多云",
+      3: "阴",
+      45: "雾",
+      48: "冻雾",
+      51: "小雨",
+      53: "中雨",
+      55: "大雨",
+      61: "小雨",
+      63: "中雨",
+      65: "大雨",
+      71: "小雪",
+      73: "中雪",
+      75: "大雪",
+      95: "雷阵雨",
+      96: "雷阵雨伴小冰雹",
+      99: "雷阵雨伴大冰雹"
+  };
+  // 1. 第一步：根据城市名获取经纬度
+  async function getCoordinates(cityName) {
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&&language=zh`);
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+          // 返回第一个匹配结果的经纬度
+          return {
+              latitude: data.results[0].latitude,
+              longitude: data.results[0].longitude,
+              city: data.results[0].name
+          };
+      } else {
+          throw new Error("未找到该城市");
+      }
   }
-  
-  const locationData = await locationResponse.json();
-  
-  if (locationData.code === '200' && locationData.location && locationData.location[0]) {
-    const locationId = locationData.location[0].id;
-    
-    // 使用location ID获取实时天气
-    const weatherResponse = await fetch(
-      `https://devapi.qweather.com/v7/weather/now?location=${locationId}&key=${heWeatherKey}`,
-      { mode: 'cors' }
-    );
-    
-    if (!weatherResponse.ok) {
-      throw new Error('天气查询失败');
-    }
-    
-    const weatherData = await weatherResponse.json();
-    
-    if (weatherData.code === '200' && weatherData.now) {
-      weather = weatherData.now.text || '晴朗';
-    } else {
-      console.warn('天气数据异常:', weatherData);
-    }
-  } else {
-    console.warn('未找到指定城市:', city);
+  // 2. 第二步：根据经纬度获取天气
+  async function fetchWeather(latitude, longitude) {
+      const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+      );
+      return await response.json();
   }
-} catch (e) {
-  console.warn('天气获取失败，使用默认值:', e);
-}
+
+  try {
+      // 获取经纬度
+      const location = await getCoordinates(city);
+      console.log('定位信息:', location);
+      // 获取天气
+      const weatherData = await fetchWeather(location.latitude, location.longitude);
+      console.log('天气信息:', weatherData);
+      
+      if (weatherData.current_weather) {
+        const code = weatherData.current_weather.weathercode;
+        weather = weatherMap[code] || "未知";
+      } else {
+        console.warn('天气数据异常:', weatherData);
+      }
+  } catch (e) {
+    console.warn('天气获取失败，使用默认值:', e);
+  }
 
   // 构造 Prompt
   const prompt = `你是一位专业时尚顾问。用户是${gender}，年龄约${ageRange}岁，今天所在地（${city}）天气为“${weather}”。请推荐一套适合今天的穿搭，包括上衣、下装、鞋子和配饰建议。语气亲切简洁，不超过100字。`;
