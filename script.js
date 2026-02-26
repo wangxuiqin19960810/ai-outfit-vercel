@@ -27,28 +27,48 @@ generateBtn.addEventListener('click', async () => {
 
   // 获取天气（使用 wttr.in，支持 CORS）
   let weather = '晴朗';
-  try {
-    // TODO: 替换为你的和风天气API Key
-    const heWeatherKey = 'd4bc9c5f3e1a43c3884abfc4f3f7becd';
+try {
+  // 使用你现有的API Key
+  const heWeatherKey = 'd4bc9c5f3e1a43c3884abfc4f3f7becd';
+  
+  // 注意：需要先通过城市名获取location ID
+  const locationResponse = await fetch(
+    `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
+    { mode: 'cors' }
+  );
+  
+  if (!locationResponse.ok) {
+    throw new Error('城市查询失败');
+  }
+  
+  const locationData = await locationResponse.json();
+  
+  if (locationData.code === '200' && locationData.location && locationData.location[0]) {
+    const locationId = locationData.location[0].id;
     
-    const res = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${heWeatherKey}`, {
-      mode: 'cors'
-    });
+    // 使用location ID获取实时天气
+    const weatherResponse = await fetch(
+      `https://devapi.qweather.com/v7/weather/now?location=${locationId}&key=${heWeatherKey}`,
+      { mode: 'cors' }
+    );
     
-    if (!res.ok) {
-      throw new Error('天气API请求失败');
+    if (!weatherResponse.ok) {
+      throw new Error('天气查询失败');
     }
     
-    const weatherData = await res.json();
+    const weatherData = await weatherResponse.json();
     
     if (weatherData.code === '200' && weatherData.now) {
       weather = weatherData.now.text || '晴朗';
     } else {
-      console.warn('天气API返回异常:', weatherData);
+      console.warn('天气数据异常:', weatherData);
     }
-  } catch (e) {
-    console.warn('天气获取失败，使用默认值:', e);
+  } else {
+    console.warn('未找到指定城市:', city);
   }
+} catch (e) {
+  console.warn('天气获取失败，使用默认值:', e);
+}
 
   // 构造 Prompt
   const prompt = `你是一位专业时尚顾问。用户是${gender}，年龄约${ageRange}岁，今天所在地（${city}）天气为“${weather}”。请推荐一套适合今天的穿搭，包括上衣、下装、鞋子和配饰建议。语气亲切简洁，不超过100字。`;
