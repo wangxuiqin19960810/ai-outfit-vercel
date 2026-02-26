@@ -28,12 +28,26 @@ generateBtn.addEventListener('click', async () => {
   // 获取天气（使用 wttr.in，支持 CORS）
   let weather = '晴朗';
   try {
-    const res = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=%C`, {
+    // TODO: 替换为你的和风天气API Key
+    const heWeatherKey = 'a5b3f1b1dba843a893bf60dec789312f';
+    
+    const res = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${encodeURIComponent(city)}&key=${heWeatherKey}`, {
       mode: 'cors'
     });
-    weather = (await res.text()).trim() || '晴朗';
+    
+    if (!res.ok) {
+      throw new Error('天气API请求失败');
+    }
+    
+    const weatherData = await res.json();
+    
+    if (weatherData.code === '200' && weatherData.now) {
+      weather = weatherData.now.text || '晴朗';
+    } else {
+      console.warn('天气API返回异常:', weatherData);
+    }
   } catch (e) {
-    console.warn('天气获取失败，使用默认值');
+    console.warn('天气获取失败，使用默认值:', e);
   }
 
   // 构造 Prompt
