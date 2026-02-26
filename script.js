@@ -31,7 +31,7 @@ generateBtn.addEventListener('click', async () => {
     // TODO: 替换为你的和风天气API Key
     const heWeatherKey = 'a5b3f1b1dba843a893bf60dec789312f';
     
-    const res = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${encodeURIComponent(city)}&key=${heWeatherKey}`, {
+    const res = await fetch(`https://devapi.qweather.com/v7/weather/now?location=${city}&key=${heWeatherKey}`, {
       mode: 'cors'
     });
     
