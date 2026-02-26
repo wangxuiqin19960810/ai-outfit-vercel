@@ -31,11 +31,11 @@ try {
   // 使用你现有的API Key
   const heWeatherKey = 'd4bc9c5f3e1a43c3884abfc4f3f7becd';
   
-  // 注意：需要先通过城市名获取location ID
-  const locationResponse = await fetch(
-    `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
-    { mode: 'cors' }
-  );
+  // 第一步：通过城市名称获取location ID
+    const locationResponse = await fetch(
+      `https://devapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(city)}&key=${heWeatherKey}`,
+      { mode: 'cors' }
+    );
   
   if (!locationResponse.ok) {
     throw new Error('城市查询失败');
